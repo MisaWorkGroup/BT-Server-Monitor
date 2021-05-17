@@ -1,4 +1,30 @@
 <?php
+	$panel = array();
+	
+	// =========== 请在这里设置本程序相关设置！============
+	$allowOrigin = array( // 设置允许访问的域名来源，单个域名请只保留一行，多个请遵循示例格式
+		'https://a.baidu.com',
+		'http://111.222.333.444'
+	);
+	
+	$panel['name'] = '服务器 A';                          // 你希望展示的服务器名称
+	$panel['url'] = 'http://127.0.0.1:8888';             // 服务器面板地址，带 http:、地址和端口，不带入口地址，结尾不要带 /
+	$panel['apikey'] = '1145141919810henghenghengaaaaa'; // 宝塔面板 API 的 APIKEY
+	
+	$cookiePathPre = ''; // 存放面板 Cookies 的目录前缀，推荐你用随机字符串摇一个来保障安全，当然你也可以不这么做
+	// ↑记得也要在服务器里设置这个目录！
+	// =========== 请在这里设置本程序相关设置！============
+	
+	
+	$origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
+	
+	if (in_array($origin, $allowOrigin)) {
+		header('Access-Control-Allow-Origin:' . $origin);
+	} else {
+		header('HTTP/1.0 404 Not Found');
+		die();
+	}
+	
 	if ($_SERVER['REQUEST_METHOD'] != 'POST') {
 		header('HTTP/1.0 404 Not Found');
 		die();
@@ -10,68 +36,46 @@
 	}
 	
 	session_start();
-	if (empty($_SESSION['lastSubTime'])) {
+	$lastSubTime = $_SESSION['lastSubTime'];
+	$_SESSION['lastSubTime'] = time();
+	
+	if (time() - $lastSubTime < 1) {
 		header('HTTP/1.0 404 Not Found');
 		die();
 	}
-	
-	if (time() - $_SESSION['lastSubTime'] < 1) {
-		header('HTTP/1.0 404 Not Found');
-		die();
-	}
-	
-	$panel = array();
-	
-	// =========== 请在这里设置你的服务器的宝塔面板 API 相关参数！
-	$panel['name'] = array( // 你希望展示的服务器名称，单个数据保留一行即可，多个服务器请遵守示例数据的格式
-		'服务器 A',
-		'服务器 B'
-	);
-	$panel['url'] = array( // 服务器面板地址，带 http:、地址和端口，不带入口地址，结尾不要带 /，格式要求同上
-		'http://192.168.1.1:8888',
-		'http://192.168.1.2:8888'
-	);
-	$panel['apikey'] = array( // 宝塔面板 API 的 APIKEY，格式要求同上
-		'1145141919810',
-		'henghenghengaaaaaaa'
-	);
-	
-	$cookiePathPre = ''; // 存放面板 Cookies 的目录前缀，推荐你用随机字符串摇一个来保障安全，当然你也可以不这么做
-	// =========== 请在这里设置你的服务器的宝塔面板 API 相关参数！
 	
 	$return = array();
 	
-	for ($i = 0; $i < count($panel['apikey']); $i++) {
-		$data = array();
-		
-		$data['request_token'] = md5(time() . '' . md5($panel['apikey'][$i]));
-		$data['request_time'] = time();
-		
-		$result = HttpPostCookie($panel['url'][$i], '/system?action=GetNetWork', $data, 5);
-		$result = json_decode($result, true);
-		
-		$return[$i]['name'] = $panel['name'][$i];
-		
-		$return[$i]['network']['upTotal'] = $result['upTotal'];
-		$return[$i]['network']['downTotal'] = $result['downTotal'];
-		$return[$i]['network']['up'] = $result['up'];
-		$return[$i]['network']['down'] = $result['down'];
-		
-		$return[$i]['cpu'] = $result['cpu'];
-		$return[$i]['load'] = $result['load'];
-		$return[$i]['mem'] = $result['mem'];
-		$return[$i]['disk'] = $result['disk'];
-		
-		$return[$i]['system']['name'] = $result['system'];
-		$return[$i]['system']['time'] = $result['time'];
-	}
+	$data = array();
+	
+	$data['request_token'] = md5(time() . '' . md5($panel['apikey']));
+	$data['request_time'] = time();
+	
+	$result = HttpPostCookie($panel['url'], '/system?action=GetNetWork', $data, 5, $cookiePathPre);
+	$result = json_decode($result, true);
+	
+	if ($result)
+		$return['code'] = 200;
+	
+	$return['result']['name'] = $panel['name'];
+	
+	$return['result']['network']['upTotal'] = $result['upTotal'];
+	$return['result']['network']['downTotal'] = $result['downTotal'];
+	$return['result']['network']['up'] = $result['up'];
+	$return['result']['network']['down'] = $result['down'];
+	
+	$return['result']['cpu'] = $result['cpu'];
+	$return['result']['load'] = $result['load'];
+	$return['result']['mem'] = $result['mem'];
+	$return['result']['disk'] = $result['disk'];
+	
+	$return['result']['system']['name'] = $result['system'];
+	$return['result']['system']['time'] = $result['time'];
 	
 	echo json_encode($return);
 	
-	$_SESSION['lastSubTime'] = time();
-	
-	function HttpPostCookie($url, $dir, $data, $timeout = 10) {
-		$cookie_file = './data/' . $cookiePathPre . 'cook/' . md5($url) . '.cookie';
+	function HttpPostCookie($url, $dir, $data, $timeout = 10, $cookiePre) {
+		$cookie_file = './data/' . $cookiePre . 'cook/' . md5($url) . '.cookie';
 		if (!file_exists($cookie_file)) {
 			$fp = fopen($cookie_file,'w+');
 			fclose($fp);

@@ -1,11 +1,18 @@
 var vConsole;
-var resultDiv = document.getElementById('resultDiv');
+const resultDiv = document.getElementById('resultDiv');
+var serverPanel = new Array();
 
 var getBetween = 3000;
 var getEvent;
 
-const _CardHead = '<div class="mdui-col-xs-12 mdui-col-sm-6 mdui-col-md-4">' +
-		'<div class="mdui-card" style="margin-bottom:16px">' +
+
+// ============== 请在这里设置你的服务器信息获取入口！===========
+const servers = ['./get.php', // 设置服务器的信息获取入口，可以是相对路径也可以是绝对，跨域域名请注意设置允许跨域和 HTTP/HTTPS
+		'http://111.222.333.444:8080/getStatus.php'];
+// ============== 请在这里设置你的服务器信息获取入口！===========
+
+
+const _CardHead = '<div class="mdui-card" style="margin-bottom:16px">' +
 		'<div class="mdui-card-content">' +
 		'<div class="mdui-typo-title mdui-text-truncate">';
 const _CardCpuSeize = '</div>' +
@@ -43,7 +50,6 @@ const _CardBandwidthDown = '<br>' +
 		'<i class="mdui-icon material-icons">&#xe5db;</i>';
 const _CardEnd = '</p>' +
 		'</div>' +
-		'</div>' +
 		'</div>';
 
 getEvent = setInterval(function() {
@@ -54,66 +60,77 @@ getServerInfo();
 
 
 function getServerInfo() {
-	mdui.$.ajax({
-		method: 'POST',
-		url: './get.php',
-		data: {
-			time: Date.now().toString().substr(0, 10)
-		},
-		success: function(data) {
-			if (data != '') {
-				var obj;
-				try {
-					obj = JSON.parse(data);
-				} catch(e) {
-					console.log(e);
-				}
-				
-				if (obj.length) {
-					var result = '';
-					
-					for (var i = 0; i < obj.length; i++) {
-						var info = obj[i];
-						
-						result += _CardHead + info.name;
-						
-						result += _CardCpuSeize + info.cpu[0] + '%';
-						result += _CardCpuSeizeBar + info.cpu[0];
-						
-						let _MemUsedPer = (info.mem.memRealUsed / info.mem.memTotal) * 100;
-						result += _CardMemSeize;
-						result +=  _MemUsedPer.toFixed(2);
-						result += '%（' + info.mem.memRealUsed + 'MB / ' + info.mem.memTotal + 'MB）';
-						result += _CardMemSeizeBar + _MemUsedPer.toFixed(2) + '%';
-						
-						for (var y = 0; y < info.disk.length; y++) {
-							result += _CardDiskSeize;
-							result += info.disk[y].size[3];
-							result += '（' + info.disk[y].size[1] + ' / ' + info.disk[y].size[0] + '）';
-							result += _CardDiskSeizeBar + info.disk[y].size[3];
-						}
-						
-						result += _CardLoadSeize + info.load.one;
-						result += _CardLoadSeizeBar + info.load.one;
-						
-						result += _CardSystemName + info.system.name;
-						result += _CardSysRuntime + info.system.time;
-						
-						let _TotalBandwidthUp = info.network.upTotal / 1024 / 1024;
-						let _TotalBandwidthDown = info.network.downTotal / 1024 / 1024;
-						result += _CardBandwidthUp + info.network.up + 'KB/s（总' + _TotalBandwidthUp.toFixed(2) + 'MB）';
-						result += _CardBandwidthDown + info.network.down + 'KB/s（总' + _TotalBandwidthDown.toFixed(2) + 'MB）';
-						result += _CardEnd;
+	for (var i = 0; i < servers.length; i++) {
+		const currentServer = i;
+		
+		mdui.$.ajax({
+			method: 'POST',
+			url: servers[currentServer],
+			data: {
+				time: Date.now().toString().substr(0, 10)
+			},
+			success: function(data) {
+				if (data != '') {
+					var obj;
+					try {
+						obj = JSON.parse(data);
+					} catch(e) {
+						console.log(e);
 					}
 					
-					resultDiv.innerHTML = result;
-					mdui.$(resultDiv).mutation();
-					
+					if (obj) {
+						var result = '';
+						
+						if (obj.code == 200) {
+							var info = obj.result;
+							
+							result += _CardHead + info.name;
+							
+							result += _CardCpuSeize + info.cpu[0] + '%';
+							result += _CardCpuSeizeBar + info.cpu[0];
+							
+							let _MemUsedPer = (info.mem.memRealUsed / info.mem.memTotal) * 100;
+							result += _CardMemSeize;
+							result +=  _MemUsedPer.toFixed(2);
+							result += '%（' + info.mem.memRealUsed + 'MB / ' + info.mem.memTotal + 'MB）';
+							result += _CardMemSeizeBar + _MemUsedPer.toFixed(2) + '%';
+							
+							for (var y = 0; y < info.disk.length; y++) {
+								result += _CardDiskSeize;
+								result += info.disk[y].size[3];
+								result += '（' + info.disk[y].size[1] + ' / ' + info.disk[y].size[0] + '）';
+								result += _CardDiskSeizeBar + info.disk[y].size[3];
+							}
+							
+							result += _CardLoadSeize + info.load.one;
+							result += _CardLoadSeizeBar + info.load.one;
+							
+							result += _CardSystemName + info.system.name;
+							result += _CardSysRuntime + info.system.time;
+							
+							let _TotalBandwidthUp = info.network.upTotal / 1024 / 1024;
+							let _TotalBandwidthDown = info.network.downTotal / 1024 / 1024;
+							result += _CardBandwidthUp + info.network.up + 'KB/s（总' + _TotalBandwidthUp.toFixed(2) + 'MB）';
+							result += _CardBandwidthDown + info.network.down + 'KB/s（总' + _TotalBandwidthDown.toFixed(2) + 'MB）';
+							result += _CardEnd;
+							
+							if (serverPanel.length < 1)
+								resultDiv.innerHTML = '';
+							
+							if (!serverPanel[currentServer]) {
+								serverPanel[currentServer] = document.createElement('div');
+								serverPanel[currentServer].className = 'mdui-col-xs-12 mdui-col-sm-6 mdui-col-md-4';
+								resultDiv.appendChild(serverPanel[currentServer]);
+							}
+							
+							serverPanel[currentServer].innerHTML = result;
+							mdui.$(resultDiv).mutation();
+						}
+					}
 				}
-				
 			}
-		}
-	});
+		});
+	}
 }
 
 function setRefreshBetween() {

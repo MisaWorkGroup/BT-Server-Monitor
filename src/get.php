@@ -10,10 +10,12 @@
 	}
 	
 	session_start();
+	/**
 	if (empty($_SESSION['lastSubTime'])) {
 		header('HTTP/1.0 404 Not Found');
 		die();
 	}
+	**/
 	
 	if (time() - $_SESSION['lastSubTime'] < 1) {
 		header('HTTP/1.0 404 Not Found');

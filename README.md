@@ -1,7 +1,7 @@
 # BT-Server-Monitor
 一个基于宝塔面板 API 的服务器状态监控面板
 
-演示：https://status.misaliu.top/
+演示：https://status.misaliu.top/ *（演示站使用 `Another` 分支搭建）*
 
 ## 特点
 

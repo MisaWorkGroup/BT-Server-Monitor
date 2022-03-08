@@ -76,6 +76,12 @@
 	
 	function HttpPostCookie($url, $dir, $data, $timeout = 10, $cookiePre) {
 		$cookie_file = './data/' . $cookiePre . 'cook/' . md5($url) . '.cookie';
+		if (!is_dir('./data')) {
+			mkdir('./data');
+		}
+		if (!is_dir(dirname($cookie_file))) {
+			mkdir(dirname($cookie_file));
+		}
 		if (!file_exists($cookie_file)) {
 			$fp = fopen($cookie_file,'w+');
 			fclose($fp);

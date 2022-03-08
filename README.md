@@ -3,7 +3,6 @@
 
 演示：https://status.misaliu.top/
 
-
 ## 特点
 
 - 使用 PHP 制作，部署简单

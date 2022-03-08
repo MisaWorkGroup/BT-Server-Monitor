@@ -107,7 +107,10 @@ async function getServerInfo() {
 			let response = await mdui.$.ajax({
 				method: 'POST',
 				url: server.url,
-				dataType: 'json'
+				dataType: 'json',
+				data: {
+					time: Date.now()
+				}
 			});
 			response = response.result;
 

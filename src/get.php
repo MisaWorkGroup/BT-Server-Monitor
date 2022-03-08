@@ -30,17 +30,7 @@
 		die();
 	}
 	
-	if ($_POST['time'] > time() + 1 || $_POST['time'] < time() - 1) {
-		header('HTTP/1.0 404 Not Found');
-		die();
-	}
-	**/
-	
-	session_start();
-	$lastSubTime = $_SESSION['lastSubTime'];
-	$_SESSION['lastSubTime'] = time();
-	
-	if (time() - $lastSubTime < 1) {
+	if ($_POST['time'] > time() * 1000 + 2000 || $_POST['time'] < time() * 1000 - 2000) {
 		header('HTTP/1.0 404 Not Found');
 		die();
 	}

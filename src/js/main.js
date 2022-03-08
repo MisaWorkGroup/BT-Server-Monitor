@@ -120,9 +120,9 @@ async function getServerInfo() {
 				let totalStorageUsedSize = 0;
 
 				for (let disk of response.disk) {
-					totalStorageUsage += stringToNumber(disk.size[3]);
 					totalStorageSize += stringToNumber(disk.size[0]);
 					totalStorageUsedSize += stringToNumber(disk.size[1]);
+					totalStorageUsage += stringToNumber(disk.size[1]) / stringToNumber(disk.size[0]);
 
 					function stringToNumber(text) {
 						let pattern = /^(\d+)(.+)$/;

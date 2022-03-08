@@ -34,6 +34,7 @@
 		header('HTTP/1.0 404 Not Found');
 		die();
 	}
+	**/
 	
 	session_start();
 	$lastSubTime = $_SESSION['lastSubTime'];

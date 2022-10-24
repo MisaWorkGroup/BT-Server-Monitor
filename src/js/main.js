@@ -105,7 +105,7 @@ getServerInfo();
 function getServerInfo() {
 	for (let server of serverPanel) {
 		mdui.$.ajax({
-			method: 'POST',
+			method: 'GET',
 			url: server.url,
 			dataType: 'json',
 			data: {

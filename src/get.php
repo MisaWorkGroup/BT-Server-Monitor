@@ -16,24 +16,21 @@
 	// =========== 请在这里设置本程序相关设置！============
 	
 	
-	$origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
+	$origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : null;
 	
 	if (in_array($origin, $allowOrigin)) {
 		header('Access-Control-Allow-Origin:' . $origin);
-	} else {
+	} else if (!is_null($origin)) {
 		header('HTTP/1.0 404 Not Found');
 		die();
 	}
-	
-	if ($_SERVER['REQUEST_METHOD'] != 'POST') {
+
+	/*
+	if ($_POST['time'] > time() * 1000 + 3000 || $_POST['time'] < time() * 1000 - 3000) {
 		header('HTTP/1.0 404 Not Found');
 		die();
 	}
-	
-	if ($_POST['time'] > time() * 1000 + 2000 || $_POST['time'] < time() * 1000 - 2000) {
-		header('HTTP/1.0 404 Not Found');
-		die();
-	}
+	*/
 	
 	$return = array();
 	
@@ -66,10 +63,8 @@
 	echo json_encode($return);
 	
 	function HttpPostCookie($url, $dir, $data, $timeout = 10, $cookiePre) {
-		$cookie_file = './data/' . $cookiePre . 'cook/' . md5($url) . '.cookie';
-		if (!is_dir('./data')) {
-			mkdir('./data');
-		}
+		$cookie_file = './' . $cookiePre . 'cook/' . md5($url) . '.cookie';
+
 		if (!is_dir(dirname($cookie_file))) {
 			mkdir(dirname($cookie_file));
 		}

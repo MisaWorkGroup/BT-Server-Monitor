@@ -66,6 +66,7 @@ for (let server of servers) {
 		progress.className = 'mdui-progress';
 		progressValue.className = 'mdui-progress-indeterminate';
 	
+		p.className = 'mdui-text-truncate';
 		p.innerHTML = name + '：获取中...';
 	
 		progress.appendChild(progressValue);
@@ -105,7 +106,7 @@ async function getServerInfo() {
 	for (let server of serverPanel) {
 		try {
 			let response = await mdui.$.ajax({
-				method: 'POST',
+				method: 'GET',
 				url: server.url,
 				dataType: 'json',
 				data: {

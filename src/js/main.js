@@ -63,10 +63,10 @@ for (let server of servers) {
 		let progress = document.createElement('div');
 		let progressValue = document.createElement('div');
 	
+		p.className = 'mdui-text-truncate';
 		progress.className = 'mdui-progress';
 		progressValue.className = 'mdui-progress-indeterminate';
 	
-		p.className = 'mdui-text-truncate';
 		p.innerHTML = name + '：获取中...';
 	
 		progress.appendChild(progressValue);
@@ -102,25 +102,24 @@ getEvent = setInterval(function() {
 
 getServerInfo();
 
-async function getServerInfo() {
+function getServerInfo() {
 	for (let server of serverPanel) {
-		try {
-			let response = await mdui.$.ajax({
-				method: 'GET',
-				url: server.url,
-				dataType: 'json',
-				data: {
-					time: Date.now()
-				}
-			});
-			response = response.result;
-
-			if (response) {
+		mdui.$.ajax({
+			method: 'POST',
+			url: server.url,
+			dataType: 'json',
+			data: {
+				time: Date.now()
+			},
+			success: (res) => {
+				let json = res.result;
+				if (!json) console.error('No data found');
+				
 				let totalStorageUsage = 0;
 				let totalStorageSize = 0;
 				let totalStorageUsedSize = 0;
 
-				for (let disk of response.disk) {
+				for (let disk of json.disk) {
 					totalStorageSize += stringToNumber(disk.size[0]);
 					totalStorageUsedSize += stringToNumber(disk.size[1]);
 					totalStorageUsage += stringToNumber(disk.size[1]) / stringToNumber(disk.size[0]);
@@ -151,27 +150,28 @@ async function getServerInfo() {
 						}
 					}
 				}
-				totalStorageUsage = totalStorageUsage / response.disk.length;
-				totalStorageSize = totalStorageSize / response.disk.length;
-				totalStorageUsedSize = totalStorageUsedSize / response.disk.length;
+				totalStorageUsage = totalStorageUsage / json.disk.length;
+				totalStorageSize = totalStorageSize / json.disk.length;
+				totalStorageUsedSize = totalStorageUsedSize / json.disk.length;
 
 
-				server.serverName.innerHTML = response.name;
+				server.serverName.innerHTML = json.name;
 
-				server.cpuInfo.setValue(response.cpu[0] / 100);
-				server.ramInfo.setValue(response.mem.memRealUsed / response.mem.memTotal, response.mem.memRealUsed + 'MB/' + response.mem.memTotal + 'MB');
-				server.storageInfo.setValue(totalStorageUsage, totalStorageUsedSize + 'GB/' + totalStorageSize + 'GB，共 ' + response.disk.length + ' 块硬盘');
-				server.loadInfo.setValue(response.load.one / 100);
+				server.cpuInfo.setValue(json.cpu[0] / 100);
+				server.ramInfo.setValue(json.mem.memRealUsed / json.mem.memTotal, json.mem.memRealUsed + 'MB/' + json.mem.memTotal + 'MB');
+				server.storageInfo.setValue(totalStorageUsage, totalStorageUsedSize + 'GB/' + totalStorageSize + 'GB，共 ' + json.disk.length + ' 块硬盘');
+				server.loadInfo.setValue(json.load.one / 100);
 
-				server.info.innerHTML = '服务器系统：' + response.system.name + '<br>持续运行时长：' + response.system.time;
-				server.network.innerHTML = '<i class="mdui-icon material-icons">&#xe5d8;</i>' + response.network.up + 'KB/s（总 ' + (response.network.upTotal / 1024 / 1024).toFixed(2) + 'MB）<br>' + 
-					'<i class="mdui-icon material-icons">&#xe5db;</i>' + response.network.down + 'KB/s（总 ' + (response.network.downTotal / 1024 / 1024).toFixed(2) + 'MB）';
+				server.info.innerHTML = '服务器系统：' + json.system.name + '<br>持续运行时长：' + json.system.time;
+				server.network.innerHTML = '<i class="mdui-icon material-icons">&#xe5d8;</i>' + json.network.up + 'KB/s（总 ' + (json.network.upTotal / 1024 / 1024).toFixed(2) + 'MB）<br>' + 
+					'<i class="mdui-icon material-icons">&#xe5db;</i>' + json.network.down + 'KB/s（总 ' + (json.network.downTotal / 1024 / 1024).toFixed(2) + 'MB）';
 
 				mdui.$(resultDiv).mutation();
+			},
+			error: (xhr, textStatus) => {
+				console.error(textStatus);
 			}
-		} catch (e) {
-			console.error(e);
-		}
+		});
 	}
 }
 

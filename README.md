@@ -7,7 +7,7 @@
 
 因为我自己已经换到哪吒面板来做服务器状态了，所以这个坑就不继续更新了，如果有需求的话可以继续 fork 了再更新也没问题的（记得遵守开源协议！）。
 
-不过你也可以看看我给哪吒面板做的 MDUI 主题：[MisaLiu/nezha-theme-mdui](https://github.com/MisaLiu/nezha-theme-mdui)
+不过你也可以看看我给哪吒面板做的 MDUI 主题：[MisaLiu/nezha-theme-mdui](https://github.com/MisaLiu/nezha-theme-mdui)，跟这个长得基本是一样的。
 
 ## 特点
 

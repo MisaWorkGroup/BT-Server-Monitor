@@ -3,6 +3,12 @@
 
 演示：https://status.misaliu.top/
 
+## 已经弃坑嘞
+
+因为我自己已经换到哪吒面板来做服务器状态了，所以这个坑就不继续更新了，如果有需求的话可以继续 fork 了再更新也没问题的（记得遵守开源协议！）。
+
+不过你也可以看看我给哪吒面板做的 MDUI 主题：[MisaLiu/nezha-theme-mdui](https://github.com/MisaLiu/nezha-theme-mdui)
+
 ## 特点
 
 - 使用 PHP 制作，部署简单
